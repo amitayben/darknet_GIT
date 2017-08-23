@@ -4,7 +4,11 @@ LOG_NAME=TIME_log"$(date +%Y%m%d)"
 EnterDIR=${PWD##*/}	#Save current dir
 START_TIME=$SECONDS	#Save Start time
 
+pre_install(){
 
+sudo apt-get install imagemagick libmagickwand-dev
+
+}
 clean_old_pictures(){
 temp_path="$(pwd)"
 cd /home/$(whoami)/darknet/data
