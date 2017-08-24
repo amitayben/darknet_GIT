@@ -9,6 +9,31 @@ pre_install(){
 sudo apt-get install imagemagick libmagickwand-dev
 
 }
+
+init_cnn(){
+tmp_PATH="$(pwd)"
+cd /home/$(whoami)
+if [ ! -d darknet ]; then
+	git clone https://github.com/pjreddie/darknet.git
+	cd darknet
+	make
+fi
+download_weight "yolo"
+download_weight "tiny-yolo-voc"
+download_weight "extraction"
+download_weight "alexnet"
+cd $tmp_PATH
+}
+
+download_weight(){
+tmp_PATH="$(pwd)"
+cd /home/$(whoami)/darknet
+if [ ! -e "$1.weights" ]; then
+	wget https://pjreddie.com/media/files/"$1.weights" 
+	#add weights
+fi
+cd $tmp_PATH
+}
 clean_old_pictures(){
 temp_path="$(pwd)"
 cd /home/$(whoami)/darknet/data
@@ -181,6 +206,7 @@ if [ $picture_type == "mp4" ]; then
 fi
 picture_resolution="$(identify /home/$(whoami)/darknet/data/$picture | awk -F ' ' '{printf $3}')"
 get_my_pc_info
+init_cnn
 TMP_TIME=$SECONDS	#Save Last time
 run_YOLO
 run_tiny_YOLO
