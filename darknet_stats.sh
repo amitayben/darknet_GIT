@@ -188,7 +188,7 @@ display AlexNet_$picture_noEND.png &
 download_youtube(){
 tmp_path="$(pwd)"
 chmod 777 youtube_wget.pl
-sed -i -e 's/\r$//' youtube_wget.pl
+#sed -i -e 's/\r$//' youtube_wget.pl
 ./youtube_wget.pl $picture
 sleep 3
 mv *.mp4 youtube.mp4
