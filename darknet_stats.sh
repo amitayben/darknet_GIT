@@ -35,9 +35,11 @@ cd $tmp_PATH
 clean_old_pictures(){
 temp_path="$(pwd)"
 cd /home/$(whoami)/darknet/data
-rm tmp*.*
+rm tmp*.* *.mp4
 cd /home/$(whoami)/tmp_darknet_Stats
 rm *.png
+cd /home/$(whoami)/tmp_darknet_Stats/darknet_GIT
+rm *.png *.mp4
 cd $temp_path
 }
 
@@ -143,7 +145,6 @@ mv predictions.png YOLO_$picture_noEND.png
 
 
 #./darknet detector demo cfg/coco.data cfg/yolo.cfg yolo.weights <video file>
-
 run_tiny_YOLO(){
 cd /home/$(whoami)/darknet
 ./darknet detector test cfg/voc.data cfg/tiny-yolo-voc.cfg tiny-yolo-voc.weights data/$picture
@@ -178,10 +179,30 @@ mv predictions.png AlexNet_$picture_noEND.png
 picture_resolution(){
 echo "$(identify /home/$(whoami)/darknet/data/$picture | awk -F ' ' '{printf $3}')"
 }
-
+display_outputs(){
+display tiny_YOLO_$picture_noEND.png &
+display YOLO_$picture_noEND.png &
+display Extraction_$picture_noEND.png &
+display AlexNet_$picture_noEND.png &
+}
+download_youtube(){
+tmp_path="$(pwd)"
+chmod 777 youtube_wget.pl
+sed -i -e 's/\r$//' youtube_wget.pl
+./youtube_wget.pl $picture
+sleep 3
+mv *.mp4 youtube.mp4
+cp youtube.mp4 /home/$(whoami)/darknet/data/
+picture="youtube.mp4"
+cd $tmp_path
+}
 #===============================MAIN============================================
+clean_old_pictures
 
 picture="$1"
+if [[ $picture == *"www.youtube"* ]]; then
+	download_youtube
+fi
 picture_noEND="$((echo "$picture") | awk -F '.' '{printf $1}')"
 picture_type="$((echo "$picture") | awk -F '.' '{printf $2}')"
 
@@ -191,7 +212,7 @@ table="name_of_table"
 init_table
 tmp_space=""
 size_of_15=""
-clean_old_pictures
+
 ffmpeg_dir="ffmpeg"
 tmp_path="$(pwd)"
 if [ $picture_type == "mp4" ]; then
@@ -203,6 +224,9 @@ if [ $picture_type == "mp4" ]; then
 }
 fi
 picture_resolution="$(identify /home/$(whoami)/darknet/data/$picture | awk -F ' ' '{printf $3}')"
+if [ -z "$picture_resolution" ];then
+	echo "arrgument is not valid picture!" && exit 0;
+fi
 get_my_pc_info
 init_cnn
 TMP_TIME=$SECONDS	#Save Last time
@@ -214,9 +238,6 @@ run_AlexNet
 echo -e "\n$(cat $table)"
 print_my_pc_info
 #display /home/$(whoami)/darknet/data/$picture &
-display tiny_YOLO_$picture_noEND.png &
-display YOLO_$picture_noEND.png &
-display Extraction_$picture_noEND.png &
-display AlexNet_$picture_noEND.png &
-#rm $LOG_NAME.out
+display_outputs
 
+#rm $LOG_NAME.out
