@@ -5,9 +5,7 @@ EnterDIR=${PWD##*/}	#Save current dir
 START_TIME=$SECONDS	#Save Start time
 
 pre_install(){
-
 sudo apt-get install imagemagick libmagickwand-dev
-
 }
 
 init_cnn(){
