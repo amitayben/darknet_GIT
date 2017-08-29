@@ -130,7 +130,7 @@ picture="tmp0001.jpg"
 run_NETS(){
 run_YOLO
 run_tiny_YOLO_COCO
-run_Extraction
+#run_Extraction
 run_AlexNet
 run_tiny_YOLO_VOC
 #run_MSR_152
@@ -139,11 +139,15 @@ add_to_display(){
 display_arr=("${display_arr[@]}" "$1")
 }
 display_outputs(){
-sizeof_arr="${#display_arr[@]}"
-for((i=0 ; i < $sizeof_arr ; i++))
-do #echo "${display_arr[$i]}";
-	display "${display_arr[$i]}" &
-done
+convert -delay 5 -loop 0 *.png myimage.gif
+montage -geometry "$picture_resolution" "${display_arr[0]}" "${display_arr[1]}" "${display_arr[2]}" "${display_arr[3]}" out.png
+#sizeof_arr="${#display_arr[@]}"
+#for((i=0 ; i < $sizeof_arr ; i++))
+#do #echo "${display_arr[$i]}";
+#	display "${display_arr[$i]}" &
+#done
+display myimage.gif &
+display out.png &
 }
 save_cnn_result(){
 update_TIME
@@ -151,6 +155,7 @@ add_to_table "$1"
 cp predictions.png $CWD
 cd $CWD
 mv predictions.png $1_$picture_noEND.png
+convert -pointsize 36 -fill red -draw "text 50,50 "$1" " $1_$picture_noEND.png $1_$picture_noEND.png
 add_to_display "$1_$picture_noEND.png"
 }
 run_MSR_152(){
@@ -165,6 +170,7 @@ save_cnn_result "YOLO"
 }
 run_tiny_YOLO_COCO(){
 cd /home/$(whoami)/darknet
+echo "./darknet detect cfg/tiny-yolo.cfg tiny-yolo.weights $picture_PATH/$picture"
 ./darknet detect cfg/tiny-yolo.cfg tiny-yolo.weights $picture_PATH/$picture
 save_cnn_result "tiny_YOLO_COCO"
 }
@@ -218,10 +224,11 @@ clean_old_pictures
 ## handle user arrgement
 if [[ "`dirname "$1"`" != "." && "`dirname "$1"`" != "https://www.youtube.com" ]]; then
 	picture_PATH=`dirname "$1"`
-	picture=`basename "$1"`
 	if [ ! -d $picture_PATH ]; then
 		echo "arrgument is not valid path!" && exit 0;
 	fi
+picture=`basename "$1"`
+cp "$1" /home/$(whoami)/darknet/data
 fi
 ## handle youtube case
 if [[ $picture == *"www.youtube"* ]]; then
